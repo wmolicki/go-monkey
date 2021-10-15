@@ -8,11 +8,9 @@ import (
 
 	"github.com/wmolicki/go-monkey/lexer"
 	"github.com/wmolicki/go-monkey/token"
-
 )
 
 const PROMPT = ">> "
-
 
 func Start(in io.Reader, out io.Writer) {
 	scanner, err := readline.New(PROMPT)

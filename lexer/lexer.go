@@ -3,10 +3,10 @@ package lexer
 import "github.com/wmolicki/go-monkey/token"
 
 type Lexer struct {
-	input string
-	position int // points to current ch
-	readPosition int // current reading position (after ch)
-	ch byte // current char
+	input        string
+	position     int  // points to current ch
+	readPosition int  // current reading position (after ch)
+	ch           byte // current char
 }
 
 func New(input string) *Lexer {
@@ -93,9 +93,8 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch) }
+	return token.Token{Type: tokenType, Literal: string(ch)}
 }
-
 
 // readIdentifier reads an identifier and advances Lexer.position
 // until it encounters non-letter char.

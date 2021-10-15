@@ -9,25 +9,25 @@ type Token struct {
 
 const (
 	ILLEGAL = "ILLEGAL"
-	EOF = "EOF"
+	EOF     = "EOF"
 
 	IDENT = "IDENT"
-	INT = "INT"
+	INT   = "INT"
 
 	// operators
-	ASSIGN = "="
-	PLUS = "+"
-	MINUS = "-"
+	ASSIGN   = "="
+	PLUS     = "+"
+	MINUS    = "-"
 	ASTERISK = "*"
-	SLASH = "/"
-	BANG = "!"
-	EQ = "=="
-	NOT_EQ = "!="
+	SLASH    = "/"
+	BANG     = "!"
+	EQ       = "=="
+	NOT_EQ   = "!="
 
 	LT = "<"
 	GT = ">"
 
-	COMMA = ","
+	COMMA     = ","
 	SEMICOLON = ";"
 
 	LPAREN = "("
@@ -37,21 +37,21 @@ const (
 
 	// keywords
 	FUNCTION = "FUNCTION"
-	LET = "LET"
-	TRUE = "true"
-	FALSE = "false"
-	IF = "if"
-	ELSE = "else"
-	RETURN = "return"
+	LET      = "LET"
+	TRUE     = "true"
+	FALSE    = "false"
+	IF       = "if"
+	ELSE     = "else"
+	RETURN   = "return"
 )
 
 var keywords = map[string]TokenType{
-	"fn": FUNCTION,
-	"let": LET,
-	"true": TRUE,
-	"false": FALSE,
-	"if": IF,
-	"else": ELSE,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
 	"return": RETURN,
 }
 
