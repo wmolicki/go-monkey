@@ -198,3 +198,20 @@ func (ie *InfixExpression) String() string {
 func (ie *InfixExpression) expressionNode() {}
 
 var _ Expression = &InfixExpression{}
+
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+func (b *Boolean) String() string {
+	return b.Token.Literal
+}
+
+var _ Expression = &Boolean{}
+
+func (b *Boolean) expressionNode() {}
