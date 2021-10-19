@@ -218,8 +218,8 @@ var _ Expression = &Boolean{}
 func (b *Boolean) expressionNode() {}
 
 type IfExpression struct {
-	Token token.Token // if token
-	Condition Expression
+	Token       token.Token // if token
+	Condition   Expression
 	Consequence *BlockStatement
 	Alternative *BlockStatement
 }
@@ -238,7 +238,6 @@ func (ie *IfExpression) String() string {
 	if ie.Alternative != nil {
 		out.WriteString(ie.Alternative.String())
 	}
-
 
 	return out.String()
 }
@@ -271,9 +270,9 @@ func (bs *BlockStatement) statementNode() {}
 var _ Statement = &BlockStatement{}
 
 type FunctionLiteral struct {
-	Token token.Token // fn token
+	Token      token.Token // fn token
 	Parameters []*Identifier
-	Body *BlockStatement
+	Body       *BlockStatement
 }
 
 func (fl *FunctionLiteral) TokenLiteral() string {
@@ -302,8 +301,8 @@ func (fl *FunctionLiteral) expressionNode() {}
 var _ Expression = &FunctionLiteral{}
 
 type CallExpression struct {
-	Token token.Token // '(' token (call exp is an "infix" expression with "(" as operator)
-	Function Expression // identifier or function literal
+	Token     token.Token // '(' token (call exp is an "infix" expression with "(" as operator)
+	Function  Expression  // identifier or function literal
 	Arguments []Expression
 }
 

@@ -9,37 +9,41 @@ import (
 )
 
 func TestLetStatements(t *testing.T) {
-	input := `
-	let x = 5;
-	let y = 10;
- 	let monke = 83;
-`
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements should contain 3 statements, got %d",
-			len(program.Statements))
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"let x = 5;", "x", 5},
+		{"let y = true;", "y", true},
+		{"let foobar = y;", "foobar", "y"},
 	}
 
-	tests := []struct{ expectedIdent string }{
-		{"x"},
-		{"y"},
-		{"monke"},
-	}
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
 
-	for i, tt := range tests {
-		statement := program.Statements[i]
-		if testLetStatement(t, statement, tt.expectedIdent) == false {
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements should contain 1 statements, got %d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+
+		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+			return
+		}
+
+		val := stmt.(*ast.LetStatement).Value
+
+		if !testLiteralExpression(t, val, tt.expectedValue) {
 			return
 		}
 	}
+
 }
 
 func checkParserErrors(t *testing.T, p *Parser) {
@@ -89,24 +93,29 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 }
 
 func TestReturnStatements(t *testing.T) {
-	input := `
-	return 5;
-	return 10;
-	return 666;
-	return 5 + 6;
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if len(program.Statements) != 4 {
-		t.Fatalf("should contain 4 statements, got=%d", len(program.Statements))
+	tests := []struct {
+		input              string
+		expectedExpression string
+	}{
+		{"return 5;", "5"},
+		{"return 10;", "10"},
+		{"return 5 + 6;", "(5 + 6)"},
 	}
 
-	for _, stmt := range program.Statements {
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements should contain 1 statements, got %d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+
 		returnStmt, ok := stmt.(*ast.ReturnStatement)
 		if !ok {
 			t.Errorf("stmt did not return *ast.ReturnStatement, got=%T", stmt)
@@ -115,7 +124,17 @@ func TestReturnStatements(t *testing.T) {
 		if returnStmt.TokenLiteral() != "return" {
 			t.Errorf("returnStmt.TokenLiteral() did not return 'return', got=%T", stmt)
 		}
+
+		if returnStmt.ReturnValue == nil {
+			t.Fatalf("returnStmt.ReturnValue should contain an expression")
+		}
+
+		if returnStmt.ReturnValue.String() != tt.expectedExpression {
+			t.Errorf("wrong value of returnStmt.ReturnValue.String(), expected %s, got=%s",
+				tt.expectedExpression, returnStmt.ReturnValue.String())
+		}
 	}
+
 }
 
 func TestIdentifierExpression(t *testing.T) {
@@ -180,9 +199,9 @@ func TestIntegerLiteralExpression(t *testing.T) {
 
 func TestParsingPrefixExpressions(t *testing.T) {
 	prefixTests := []struct {
-		input        string
-		operator     string
-		value interface{}
+		input    string
+		operator string
+		value    interface{}
 	}{
 		{"!true;", "!", true},
 		{"!false;", "!", false},
@@ -199,6 +218,7 @@ func TestParsingPrefixExpressions(t *testing.T) {
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("program did not parse enough statements, got=%d", len(program.Statements))
+
 		}
 
 		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
@@ -475,7 +495,6 @@ func testInfixExpression(t *testing.T, exp ast.Expression, left interface{},
 	return true
 }
 
-
 func TestBooleanExpression(t *testing.T) {
 	input := "true;"
 
@@ -646,7 +665,7 @@ func TestFunctionLiteralParsing(t *testing.T) {
 
 func TestFunctionParameterParsing(t *testing.T) {
 	tests := []struct {
-		input string
+		input          string
 		expectedParams []string
 	}{
 		{input: "fn() {};", expectedParams: []string{}},
