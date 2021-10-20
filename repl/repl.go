@@ -5,6 +5,7 @@ import (
 
 	"github.com/chzyer/readline"
 
+	"github.com/wmolicki/go-monkey/evaluator"
 	"github.com/wmolicki/go-monkey/lexer"
 	"github.com/wmolicki/go-monkey/parser"
 )
@@ -33,8 +34,13 @@ func Start(in io.ReadCloser, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
+
+
 	}
 }
 
