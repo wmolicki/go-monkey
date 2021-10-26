@@ -13,6 +13,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Welcome %s, lets eval!\n", u.Name)
+	fmt.Printf("Monke REPL!\n", u.Name)
 	repl.Start(os.Stdin, os.Stdout)
 }

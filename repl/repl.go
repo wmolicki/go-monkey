@@ -22,6 +22,7 @@ func Start(in io.ReadCloser, out io.Writer) {
 	for {
 		line, err := scanner.Readline()
 		if err != nil || line == "\\q" {
+			io.WriteString(out, "bye")
 			return
 		}
 
