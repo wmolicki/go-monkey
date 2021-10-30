@@ -41,7 +41,6 @@ func Start(in io.ReadCloser, out io.Writer) {
 			io.WriteString(out, "\n")
 		}
 
-
 	}
 }
 
