@@ -7,6 +7,7 @@ import (
 
 	"github.com/wmolicki/go-monkey/evaluator"
 	"github.com/wmolicki/go-monkey/lexer"
+	"github.com/wmolicki/go-monkey/object"
 	"github.com/wmolicki/go-monkey/parser"
 )
 
@@ -18,6 +19,7 @@ func Start(in io.ReadCloser, out io.Writer) {
 	if err != nil {
 		panic(err)
 	}
+	env := object.NewEnvironment()
 
 	for {
 		line, err := scanner.Readline()
@@ -35,7 +37,7 @@ func Start(in io.ReadCloser, out io.Writer) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
