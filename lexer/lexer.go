@@ -71,6 +71,9 @@ func (l *Lexer) NextToken() token.Token {
 		t = newToken(token.SEMICOLON, l.ch)
 	case ',':
 		t = newToken(token.COMMA, l.ch)
+	case '"':
+		t.Type = token.STRING
+		t.Literal = l.readString()
 	case 0:
 		t.Literal = ""
 		t.Type = token.EOF
@@ -133,4 +136,15 @@ func (l *Lexer) peekChar() byte {
 		return 0
 	}
 	return l.input[l.readPosition]
+}
+
+func (l *Lexer) readString() string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+	}
+	return l.input[position:l.position]
 }

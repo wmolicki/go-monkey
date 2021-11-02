@@ -26,6 +26,8 @@ if ( 5 < 10) {
 
 33 == 33
 666 != 1986
+"test123"
+"foo bar"
 `
 
 	tests := []struct {
@@ -111,6 +113,10 @@ if ( 5 < 10) {
 		{token.INT, "666"},
 		{token.NOT_EQ, "!="},
 		{token.INT, "1986"},
+
+		{token.STRING, "test123"},
+		{token.STRING, "foo bar"},
+		{token.EOF, ""},
 	}
 
 	l := New(input)

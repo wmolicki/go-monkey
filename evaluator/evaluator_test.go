@@ -199,6 +199,7 @@ func TestErrorHandling(t *testing.T) {
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
 		{"foobar", "identifier not found: foobar"},
+	{`"hello" - "world"`, "unknown operator: STRING - STRING"},
 	}
 
 	for _, tt := range tests {
@@ -274,7 +275,8 @@ let fact = fn(n) {
 }
 
 fact(5)`, 120},
-{`let fib = fn(n) {
+{`
+let fib = fn(n) {
 	if (n < 3) {
 		return 1
 	}
@@ -282,10 +284,73 @@ fact(5)`, 120},
 };
 fib(10)
 `, 55},
+{`
+let add = fn(a, b) { a + b };
+let apply = fn(a, b, func) { func(a, b) };
+apply(1, 4, add);
+`, 5},
 	}
 
 	for _, tt := range tests {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
+func TestClosures(t *testing.T) {
+	input := `
+let newAdder = fn(x){ fn(y) { x + y }};
+let addTwo = newAdder(2);
+addTwo(3)
+`
+	testIntegerObject(t, testEval(input), 5)
+}
+
+
+func TestStringLiteral(t *testing.T) {
+	input := `"hello world!";`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String, got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "hello world!" {
+		t.Errorf("String has the wrong value. want %s, got=%q", "hello world!",
+			str.Value)
+	}
+}
+
+func TestStringConcat(t *testing.T) {
+	input := `"hello" + " " + "world!";`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String, got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "hello world!" {
+		t.Errorf("String has the wrong value. want %s, got=%q", "hello world!",
+			str.Value)
+	}
+}
+
+
+func TestStringComparison(t *testing.T) {
+	tests := []struct{input string
+	expected bool}{
+		{`"a" == "a"`, true},
+		{`"a" != "a"`, false},
+		{`"test123" == "test123"`, true},
+		{`"" == ""`, true},
+		{`"" != "something"`, true},
+		{`"CaseSensitive" == "casesensitive"`, false},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
 
