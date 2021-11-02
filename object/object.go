@@ -16,9 +16,10 @@ const (
 	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
-	FUNCTION_OBJ = "FUNCTION"
-	STRING_OBJ = "STRING"
-	BUILTIN_OBJ = "BUILTIN"
+	FUNCTION_OBJ     = "FUNCTION"
+	STRING_OBJ       = "STRING"
+	BUILTIN_OBJ      = "BUILTIN"
+	ARRAY_OBJ = "ARRAY"
 )
 
 type Object interface {
@@ -69,15 +70,14 @@ func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
 
 var _ Object = &Error{}
 
-
 type Function struct {
 	Parameters []*ast.Identifier
-	Body *ast.BlockStatement
-	Env *Environment
+	Body       *ast.BlockStatement
+	Env        *Environment
 }
 
 func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
-func (f *Function) Inspect() string  {
+func (f *Function) Inspect() string {
 	var out bytes.Buffer
 
 	params := []string{}
@@ -100,14 +100,34 @@ type String struct {
 }
 
 func (s *String) Type() ObjectType { return STRING_OBJ }
-func (s *String) Inspect() string { return s.Value }
+func (s *String) Inspect() string  { return s.Value }
 
-
-type BuiltinFunction  func(args ...Object) Object
+type BuiltinFunction func(args ...Object) Object
 
 type Builtin struct {
 	Fn BuiltinFunction
 }
 
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
-func (b *Builtin) Inspect() string { return "builtin function" }
+func (b *Builtin) Inspect() string  { return "builtin function" }
+
+
+type Array struct {
+	Elements []Object
+}
+
+func (ao *Array) Type() ObjectType { return ARRAY_OBJ }
+func (ao *Array) Inspect() string {
+	var out bytes.Buffer
+	elements := []string{}
+
+	for _, e := range ao.Elements {
+		elements = append(elements, e.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}

@@ -199,7 +199,7 @@ func TestErrorHandling(t *testing.T) {
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
 		{"foobar", "identifier not found: foobar"},
-	{`"hello" - "world"`, "unknown operator: STRING - STRING"},
+		{`"hello" - "world"`, "unknown operator: STRING - STRING"},
 	}
 
 	for _, tt := range tests {
@@ -217,10 +217,9 @@ func TestErrorHandling(t *testing.T) {
 	}
 }
 
-
 func TestLetStatements(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected int64
 	}{
 		{"let a = 5; a;", 5},
@@ -233,7 +232,6 @@ func TestLetStatements(t *testing.T) {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
 }
-
 
 func TestFunctionObject(t *testing.T) {
 	input := "fn(x) { x + 2; };"
@@ -257,7 +255,7 @@ func TestFunctionObject(t *testing.T) {
 
 func TestFunctionApplication(t *testing.T) {
 	tests := []struct {
-		input string
+		input    string
 		expected int64
 	}{
 		{"let identity = fn(x) { x; }; identity(5);", 5},
@@ -275,7 +273,7 @@ let fact = fn(n) {
 }
 
 fact(5)`, 120},
-{`
+		{`
 let fib = fn(n) {
 	if (n < 3) {
 		return 1
@@ -284,7 +282,7 @@ let fib = fn(n) {
 };
 fib(10)
 `, 55},
-{`
+		{`
 let add = fn(a, b) { a + b };
 let apply = fn(a, b, func) { func(a, b) };
 apply(1, 4, add);
@@ -304,7 +302,6 @@ addTwo(3)
 `
 	testIntegerObject(t, testEval(input), 5)
 }
-
 
 func TestStringLiteral(t *testing.T) {
 	input := `"hello world!";`
@@ -336,10 +333,11 @@ func TestStringConcat(t *testing.T) {
 	}
 }
 
-
 func TestStringComparison(t *testing.T) {
-	tests := []struct{input string
-	expected bool}{
+	tests := []struct {
+		input    string
+		expected bool
+	}{
 		{`"a" == "a"`, true},
 		{`"a" != "a"`, false},
 		{`"test123" == "test123"`, true},
@@ -355,8 +353,8 @@ func TestStringComparison(t *testing.T) {
 }
 
 func TestBuiltinFunctions(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected interface{}
 	}{
 		{`len("")`, 0},
@@ -365,7 +363,6 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`len(1)`, "argument to `len` not supported: INTEGER"},
 		{`len()`, "wrong number of arguments, got: 0, want: 1"},
 		{`len("one", "two")`, "wrong number of arguments, got: 2, want: 1"},
-
 	}
 
 	for _, tt := range tests {
@@ -387,6 +384,21 @@ func TestBuiltinFunctions(t *testing.T) {
 	}
 }
 
+func TestArrayLiterals(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+	if len(result.Elements) != 3 {
+		t.Fatalf("array has wrong num of elements. got=%d",
+			len(result.Elements))
+	}
+	testIntegerObject(t, result.Elements[0], 1)
+	testIntegerObject(t, result.Elements[1], 4)
+	testIntegerObject(t, result.Elements[2], 6)
+}
 
 func testEval(input string) object.Object {
 	l := lexer.New(input)

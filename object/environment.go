@@ -15,7 +15,7 @@ func (e *Environment) Get(name string) (Object, bool) {
 	if !ok && e.outer != nil {
 		obj, ok = e.outer.Get(name)
 	}
-	return obj,ok
+	return obj, ok
 }
 
 func (e *Environment) Set(name string, val Object) Object {
