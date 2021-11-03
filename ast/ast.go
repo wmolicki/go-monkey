@@ -371,10 +371,9 @@ func (al *ArrayLiteral) expressionNode() {}
 
 var _ Expression = &ArrayLiteral{}
 
-
 type IndexExpression struct {
 	Token token.Token // '[' token
-	Left Expression
+	Left  Expression
 	Index Expression
 }
 

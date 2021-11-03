@@ -402,7 +402,7 @@ func TestArrayLiterals(t *testing.T) {
 
 func TestArrayIndexExpressions(t *testing.T) {
 	tests := []struct {
-		input string
+		input    string
 		expected interface{}
 	}{
 		{
