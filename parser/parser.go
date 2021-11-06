@@ -61,6 +61,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+	p.registerPrefix(token.FOR, p.parseForExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -470,7 +471,7 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 
 		hash.Pairs[key] = value
 
-		if !p.peekTokenIs(token.RBRACE) && !p.expectPeekAndAdvance(token.COMMA){
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeekAndAdvance(token.COMMA) {
 			return nil
 		}
 	}
@@ -480,4 +481,35 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	}
 
 	return hash
+}
+
+func (p *Parser) parseForExpression() ast.Expression {
+	exp := &ast.ForExpression{Token: p.curToken}
+
+	if !p.expectPeekAndAdvance(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+	exp.Initializer = p.parseExpression(LOWEST)
+
+	if !p.expectPeekAndAdvance(token.SEMICOLON) {
+		return nil
+	}
+
+	exp.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeekAndAdvance(token.SEMICOLON) {
+		return nil
+	}
+
+	exp.Loop= p.parseExpression(LOWEST)
+
+	if !p.expectPeekAndAdvance(token.LBRACE) {
+		return nil
+	}
+
+	exp.Body = p.parseBlockStatement()
+
+	return exp
 }

@@ -820,8 +820,8 @@ func TestParsingHashLiteralsStringKeys(t *testing.T) {
 	}
 
 	expected := map[string]int64{
-		"one": 1,
-		"two": 2,
+		"one":   1,
+		"two":   2,
 		"three": 3,
 	}
 
@@ -834,7 +834,6 @@ func TestParsingHashLiteralsStringKeys(t *testing.T) {
 		testIntegerLiteral(t, value, expectedValue)
 	}
 }
-
 
 func TestParsingHashLiteralsBoolKeys(t *testing.T) {
 	input := `{true: 1, false: 2}`
@@ -855,7 +854,7 @@ func TestParsingHashLiteralsBoolKeys(t *testing.T) {
 	}
 
 	expected := map[bool]int64{
-		true: 1,
+		true:  1,
 		false: 2,
 	}
 
@@ -868,7 +867,6 @@ func TestParsingHashLiteralsBoolKeys(t *testing.T) {
 		testIntegerLiteral(t, value, expectedValue)
 	}
 }
-
 
 func TestParsingHashLiteralsIntegerKeys(t *testing.T) {
 	input := `{1: 1, 2: 2, 3: 3}`
@@ -923,7 +921,6 @@ func TestParsingEmptyHashLiteral(t *testing.T) {
 	}
 }
 
-
 func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 	input := `{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}`
 
@@ -966,5 +963,54 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 			continue
 		}
 		testFunc(value)
+	}
+}
+
+
+func TestForrExpression(t *testing.T) {
+	input := `for (let x = 0; x < 2; let x = x + 1) { let a = 1 }`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program did not parse enough statements, got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement, got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.ForExpression)
+	if !ok {
+		t.Fatalf("exp is not *ast.ForExpression, got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, exp.Initializer, "x", "<", "y") {
+		return
+	}
+
+	if exp.Consequence == nil {
+		t.Errorf("exp.Consequence.Statements was nil, should be: x")
+	}
+
+	if len(exp.Alternative.Statements) != 1 {
+		t.Errorf("alternative is not 1 statements, got=%d",
+			len(exp.Alternative.Statements))
+	}
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Alternative.Statements[0])
+	}
+	if !testIdentifier(t, alternative.Expression, "y") {
+		return
 	}
 }

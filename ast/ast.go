@@ -395,7 +395,6 @@ func (ie *IndexExpression) expressionNode() {}
 
 var _ Expression = &IndexExpression{}
 
-
 type HashLiteral struct {
 	Token token.Token // '{'
 	Pairs map[Expression]Expression
@@ -408,7 +407,7 @@ func (hl *HashLiteral) String() string {
 
 	pairs := []string{}
 	for k, v := range hl.Pairs {
-		pairs = append(pairs, k.String() + ":" + v.String())
+		pairs = append(pairs, k.String()+":"+v.String())
 	}
 
 	out.WriteString("{")
@@ -421,3 +420,35 @@ func (hl *HashLiteral) String() string {
 func (hl *HashLiteral) expressionNode() {}
 
 var _ Expression = &HashLiteral{}
+
+type ForExpression struct {
+	Token       token.Token // for token
+	Initializer Expression
+	Condition   Expression
+	Loop Expression
+	Body *BlockStatement
+}
+
+func (fe *ForExpression) TokenLiteral() string {
+	return fe.Token.Literal
+}
+
+func (fe *ForExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for")
+	out.WriteString("(")
+	out.WriteString(fe.Initializer.String())
+	out.WriteString(";")
+	out.WriteString(fe.Condition.String())
+	out.WriteString(";")
+	out.WriteString(fe.Loop.String())
+	out.WriteString(") ")
+	out.WriteString(fe.Body.String())
+
+	return out.String()
+}
+
+func (fe *ForExpression) expressionNode() {}
+
+var _ Expression = &ForExpression{}

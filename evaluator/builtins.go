@@ -55,7 +55,7 @@ var builtins = map[string]*object.Builtin{
 			}
 			arr := args[0].(*object.Array)
 			if len(arr.Elements) > 0 {
-				return arr.Elements[len(arr.Elements) - 1]
+				return arr.Elements[len(arr.Elements)-1]
 			}
 
 			return NULL
