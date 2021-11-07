@@ -456,6 +456,10 @@ func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{
 	case int64:
 		return testIntegerLiteral(t, exp, v)
 	case string:
+		infixExpr, ok := exp.(*ast.InfixExpression)
+		if ok {
+			return infixExpr.String() == expected
+		}
 		return testIdentifier(t, exp, v)
 	case bool:
 		return testBooleanLiteral(t, exp, v)
@@ -966,9 +970,36 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 	}
 }
 
+func TestAssignmentExpression(t *testing.T) {
+	input := "x = x + 1"
 
-func TestForrExpression(t *testing.T) {
-	input := `for (let x = 0; x < 2; let x = x + 1) { let a = 1 }`
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program did not parse enough statements, got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement, got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.InfixExpression)
+	if !ok {
+		t.Fatalf("exp is not *ast.InfixExpression, got=%T", stmt.Expression)
+	}
+
+	testInfixExpression(t, exp, "x", "=", "(x + 1)")
+}
+
+func TestForExpression(t *testing.T) {
+	input := `for (let x = 0; x < 2; let x = x + 1) { let a = 1; m = m + 1 }`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -992,25 +1023,55 @@ func TestForrExpression(t *testing.T) {
 		t.Fatalf("exp is not *ast.ForExpression, got=%T", stmt.Expression)
 	}
 
-	if !testInfixExpression(t, exp.Initializer, "x", "<", "y") {
+	initializerStmt := exp.Initializer
+
+	if initializerStmt.String() != "let x = 0" {
 		return
 	}
 
-	if exp.Consequence == nil {
-		t.Errorf("exp.Consequence.Statements was nil, should be: x")
+	if !testInfixExpression(t, exp.Condition, "x", "<", 2) {
+		return
 	}
 
-	if len(exp.Alternative.Statements) != 1 {
-		t.Errorf("alternative is not 1 statements, got=%d",
-			len(exp.Alternative.Statements))
+	loopStmt := exp.Loop
+
+	if loopStmt.String() != "let x = x + 1" {
+		return
 	}
 
-	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if len(exp.Body.Statements) != 2 {
+		t.Errorf("body is not 1 statements, got=%d",
+			len(exp.Body.Statements))
+	}
+
+	letStmt := exp.Body.Statements[0]
+	if !testLetStatement(t, letStmt, "a") {
+		return
+	}
+
+	val := letStmt.(*ast.LetStatement).Value
+
+	if !testLiteralExpression(t, val, 1) {
+		return
+	}
+
+	assignStmt, ok := exp.Body.Statements[1].(*ast.ExpressionStatement)
 	if !ok {
-		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
-			exp.Alternative.Statements[0])
+		t.Fatalf("program.Statements[1] is not ast.ExpressionStatement, got=%T",
+			program.Statements[0])
 	}
-	if !testIdentifier(t, alternative.Expression, "y") {
+
+	assignExp, ok := assignStmt.Expression.(*ast.InfixExpression)
+	if !ok {
+		t.Fatalf("assignExp is not *ast.IfExpression, got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, assignExp, "m", "=", "(m + 1)") {
 		return
 	}
+
+	if !testIdentifier(t, assignExp, "m + 1") {
+		return
+	}
+
 }

@@ -94,9 +94,35 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIndexExpression(left, index)
 	case *ast.HashLiteral:
 		return evalHashLiteral(node, env)
+	case *ast.ForExpression:
+		return evalForExpression(node, env)
 	}
 
 	return nil
+}
+
+func evalForExpression(fe *ast.ForExpression, env *object.Environment) object.Object {
+	initializer := Eval(fe.Initializer, env)
+	if isError(initializer) {
+		return initializer
+	}
+
+	var returnVal object.Object
+	returnVal = NULL
+
+	for cond := Eval(fe.Condition, env); isTruthy(cond) == true; cond = Eval(fe.Condition, env) {
+		if isError(cond) {
+			return cond
+		}
+
+		returnVal = evalBlockStatment(fe.Body, env)
+		loop := Eval(fe.Loop, env)
+		if isError(loop) {
+			return loop
+		}
+	}
+
+	return returnVal
 }
 
 func evalHashLiteral(

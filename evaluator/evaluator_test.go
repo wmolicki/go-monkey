@@ -548,7 +548,7 @@ func TestForLoopExpressions(t *testing.T) {
 		expected int
 	}{
 		{
-			`let x = 0; for (let i = 0; i < 10; let i = i + 1) { let x = x + 1 }`,
+			`let x = 0; for (let i = 0; i < 10; let i = i + 1) { let x = x + 1 }; x`,
 			10,
 		},
 	}

@@ -423,10 +423,10 @@ var _ Expression = &HashLiteral{}
 
 type ForExpression struct {
 	Token       token.Token // for token
-	Initializer Expression
+	Initializer Statement
 	Condition   Expression
-	Loop Expression
-	Body *BlockStatement
+	Loop        Statement
+	Body        *BlockStatement
 }
 
 func (fe *ForExpression) TokenLiteral() string {
