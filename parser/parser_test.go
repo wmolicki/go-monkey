@@ -970,36 +970,8 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 	}
 }
 
-func TestAssignmentExpression(t *testing.T) {
-	input := "x = x + 1"
-
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if len(program.Statements) != 1 {
-		t.Fatalf("program did not parse enough statements, got=%d",
-			len(program.Statements))
-	}
-
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement, got=%T",
-			program.Statements[0])
-	}
-
-	exp, ok := stmt.Expression.(*ast.InfixExpression)
-	if !ok {
-		t.Fatalf("exp is not *ast.InfixExpression, got=%T", stmt.Expression)
-	}
-
-	testInfixExpression(t, exp, "x", "=", "(x + 1)")
-}
-
 func TestForExpression(t *testing.T) {
-	input := `for (let x = 0; x < 2; let x = x + 1) { let a = 1; m = m + 1 }`
+	input := `for (let x = 0; x < 2; let x = x + 1) { let a = 1; let m = m + 1 }`
 
 	l := lexer.New(input)
 	p := New(l)
